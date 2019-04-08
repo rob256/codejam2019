@@ -10,17 +10,20 @@ def x_find_two_products(primes_list: List[int], prime_product: int) -> Tuple[int
     return 0, 0
 
 
-def find_two_products(prime_product: int) -> Tuple[int, int]:
-    n = 2
-    while True:
-        if prime_product % n == 0:
-            return n, prime_product // n
-        n += 1
+def find_gcd(prime_product1: int, prime_product2: int) -> int:
+    # Use Euclidean division
+    if prime_product1 < prime_product2:
+        return find_gcd(prime_product2, prime_product1)
+
+    remainder = prime_product1 % prime_product2
+    if remainder == 0:
+        return prime_product2
+
+    return find_gcd(prime_product2, remainder)
 
 
 def get_decrypted_primes(all_prime_products: List[int], first_prime: int) -> List[int]:
-    decrypted_primes = []
-    decrypted_primes.append(first_prime)
+    decrypted_primes = [first_prime]
     for prime_product in all_prime_products:
         if prime_product % decrypted_primes[-1] == 0:
             decrypted_primes.append(int(prime_product / decrypted_primes[-1]))
@@ -29,16 +32,24 @@ def get_decrypted_primes(all_prime_products: List[int], first_prime: int) -> Lis
     return decrypted_primes
 
 
+def get_first_two_different_prime_products(all_prime_products: List[int]) -> Tuple[int, int]:
+    for i in range(len(all_prime_products) - 1):
+        if all_prime_products[i] != all_prime_products[i + 1]:
+            return all_prime_products[i], all_prime_products[i + 1]
+
+
 def main():
     cases = int(input())
     for _case in range(cases):
         case_number = _case + 1
         max_prime, number_of_prime_products = list(map(int, input().split()))
         all_prime_products = list(map(int, input().split()))
-        first_prime, second_prime = find_two_products(all_prime_products[0])
-        decoded_primes = []
-        if all_prime_products[1] % first_prime == 0:
-            first_prime, second_prime = second_prime, first_prime
+        if all_prime_products[0] % int(sqrt(all_prime_products[0])) == 0:
+            prime_gcd = int(sqrt(all_prime_products[0]))
+        else:
+            prime_gcd = find_gcd(*get_first_two_different_prime_products(all_prime_products))
+        first_prime = prime_gcd
+        second_prime = all_prime_products[0] // first_prime
         try:
             decoded_primes = get_decrypted_primes(all_prime_products, first_prime)
         except ValueError:
